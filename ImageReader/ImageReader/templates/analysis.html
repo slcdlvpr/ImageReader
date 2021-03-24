@@ -1,0 +1,110 @@
+{% extends "layout.html" %}
+
+{% block content %}
+
+
+<div class="container" id="results">
+    <div class="row">
+        <div class="col col-lg-12">
+            <canvas id="canvas" />
+            <img src='{{ url_for('download_file', filename = image) }}'</>
+        </div>
+    </div>
+    <div class="row">
+        <div class=" col col-lg-12">
+            <table class="table table-striped" style="max-width: 300px;">
+                <tr>
+                    <th>Image Description</th>
+                </tr>
+                <tr>
+                    <td>
+                        {{imgDescription}}
+                    </td>
+                </tr>
+        </div>
+        <div class="row">
+            <div class=" col col-lg-6">
+                <table class="table table-striped" style="max-width: 300px;">
+                    <thead>
+                        <tr>
+                            <th>Text Analysis</th>
+                        </tr>
+                    </thead>
+                    {% for result in results%}
+                    <tr>
+                        <td>{{ result }}</td>
+                    </tr>
+                    {% endfor %}
+                </table>
+            </div>
+
+        </div>
+        <div class="row">
+            <div class=" col col-lg-6">
+                <table class="table table-striped">
+
+                    <thead>
+                        <tr>
+                            <th>Image Tags</th>
+                            <th>Confidence</th>
+                        </tr>
+                    </thead>
+                    {% for tag in imagetag.tags%}
+                    <tr>
+                        <td>{{ tag.name }}</td>
+                        <td>{{ tag.confidence * 100}}</td>
+                    </tr>
+                    {% endfor %}
+                </table>
+            </div>
+        </div>
+        <div class="row">
+            <div class=" col col-lg-6">
+                <table class="table table-striped">
+
+                    <thead>
+                        <tr>
+                            <th>Object</th>
+                            <th>Confidence</th>
+                        </tr>
+                    </thead>
+                    {% for obj in imageobj.objects%}
+                    <tr>
+                        <td>{{ obj.object_property }}</td>
+                        <td>{{ obj.confidence * 100}}</td>
+                    </tr>
+                    {% endfor %}
+                </table>
+            </div>
+        </div>
+        <script>
+        console.log('working on json');
+        var elements = JSON.parse('{{imgcoordinates|tojson}}');
+        console.log('workied with json');
+        var canvas = document.getElementById("canvas");
+        ctx = canvas.getContext("2d");
+
+        canvas.width = 800;
+        canvas.height = 600;
+
+        console.log('worked on json');
+        var background = new Image();
+        background.src = "{{ url_for('download_file', filename = image) }}"
+
+        // Make sure the image is loaded first otherwise nothing will draw.
+        background.onload = function () {
+            ctx.drawImage(background, 0, 0);
+
+            elements.forEach(function (element) {
+                // Red rectangle
+                ctx.beginPath();
+                ctx.lineWidth = "2";
+                ctx.strokeStyle = "blue";
+                ctx.rect(element.x, element.y, element.w, element.h);
+                ctx.stroke();
+            });
+
+        }
+        </script>
+
+        {% endblock %}
